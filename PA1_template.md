@@ -1,19 +1,8 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 <br>This data is from a personal activity monitoring device (i.e. Fitbit, Nike Fuelband, Jawbone Up) collected from an anonymous individual during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
-```{r, include=FALSE}
-library("ggplot2")
-library("scales")
-library("gridExtra")
-library("knitr")
-opts_chunk$set(echo=TRUE)
-```
+
 <br>
 
 ### Loading and preprocessing the data
@@ -26,10 +15,21 @@ The variables included in this dataset are:
 
 The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset. Here the data is loaded into a data.frame
 
-```{r LoadData, cache=TRUE}
+
+```r
 activity <- read.csv("activity.csv", stringsAsFactors=FALSE)
 activity$date <- as.Date(activity$date, format="%Y-%m-%d")
 head(activity)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
 ```
 <br><br>
 
@@ -37,16 +37,36 @@ head(activity)
 
 Calculate the sum of steps over all sampling intervals for each date.
 
-```{r TotalSteps}
+
+```r
 totals <- aggregate(steps ~ date, data=activity, FUN=sum)
 head(totals)
+```
+
+```
+##         date steps
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
+```
+
+```r
 stats <- summary(totals$steps)
 stats
 ```
 
-<br>The mean is `r format(stats["Mean"], scientific=FALSE)`, and the median is `r format(stats["Median"], scientific=FALSE)`. Here is a histogram of the results.
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190
+```
 
-```{r PlotTotalSteps, fig.height=4, fig.width=5}
+<br>The mean is 10770, and the median is 10760. Here is a histogram of the results.
+
+
+```r
 tickValues <- pretty(totals$steps)
 tickSpacing <- (tail(tickValues, n=1) - tickValues[1]) / (length(tickValues) - 1)
 plot1 <- ggplot(totals[!is.na(totals$steps),], aes(x=steps)) + 
@@ -60,21 +80,30 @@ plot1 <- ggplot(totals[!is.na(totals$steps),], aes(x=steps)) +
                axis.title.y=element_text(size=rel(0.9), vjust=1.2))
 plot1
 ```
+
+![](./PA1_template_files/figure-html/PlotTotalSteps-1.png) 
 <br><br>
 
 ### What is the average daily activity pattern?
 
 Calculate the mean number of steps for each sampling interval over all dates.
 
-```{r IntervalMeans}
+
+```r
 means <- aggregate(steps ~ interval, data=activity, FUN=mean)
 maxSteps <- means[which.max(means$steps),]
 maxSteps
 ```
 
-<br>The time interval `r maxSteps$interval` (`r with(maxSteps, sprintf("%02d:%02d", trunc(interval / 100), interval %% 100))`) shows the greatest average number of steps to be approximately `r format(maxSteps$steps, digits=6)`. Here is a plot of the complete distribution.
+```
+##     interval    steps
+## 104      835 206.1698
+```
 
-```{r PlotIntervalMeans, fig.height=4}
+<br>The time interval 835 (08:35) shows the greatest average number of steps to be approximately 206.17. Here is a plot of the complete distribution.
+
+
+```r
 means$time <- with(means, as.POSIXct(sprintf("%02d:%02d", 
                    trunc(interval / 100), interval %% 100), format="%H:%M"))
 ggplot(means, aes(x=time, y=steps)) + 
@@ -87,20 +116,29 @@ ggplot(means, aes(x=time, y=steps)) +
               axis.title.x=element_text(size=rel(0.9), vjust=-0.5), 
               axis.title.y=element_text(size=rel(0.9), vjust=1.2))
 ```
+
+![](./PA1_template_files/figure-html/PlotIntervalMeans-1.png) 
 <br><br>
 
 ### Imputing missing values
 
 Calculate the number of rows containing missing values in this dataset.
 
-```{r MissingValues}
+
+```r
 missingValues <- sapply(activity, FUN=function(x) { sum(is.na(x)) })
 print(missingValues)
 ```
 
-<br>The number of rows containing missing values is `r missingValues["steps"]`. All missing values appear in the "steps" field. The presence of missing values may introduce bias into some calculations or summaries of the data. Previously calculated mean number of steps across all days sampled for the corresponding time interval will be substituted for these missing values.
+```
+##    steps     date interval 
+##     2304        0        0
+```
 
-```{r ImputeMissingValues}
+<br>The number of rows containing missing values is 2304. All missing values appear in the "steps" field. The presence of missing values may introduce bias into some calculations or summaries of the data. Previously calculated mean number of steps across all days sampled for the corresponding time interval will be substituted for these missing values.
+
+
+```r
 activityImpute <- activity
 for(i in which(is.na(activity$steps))) {
         j <- which(means$interval == activityImpute$interval[i])
@@ -110,15 +148,22 @@ for(i in which(is.na(activity$steps))) {
 
 <br>Calculate the sum of steps over all sampling intervals for each date using the imputed data.
 
-```{r ImputeMissingValues_Total}
+
+```r
 totalsImpute <- aggregate(steps ~ date, data=activityImpute, FUN=sum)
 statsImpute <- summary(totalsImpute$steps)
 statsImpute
 ```
 
-<br>The mean is `r format(statsImpute["Mean"], scientific=FALSE)`, and the median is `r format(statsImpute["Median"], scientific=FALSE)`. These values differ negligibly from the mean and median calculated with the missing data omitted. Because the mean and median of the un-imputed data are nearly equal, filling in the missing data using the mean of the corresponding sampling interval narrows the distribution of total steps per day but does not significantly change the mean and median. Histograms of the imputed data (left) and the original data with NA values omitted (right) are shown below.
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10760   10770   12810   21190
+```
 
-```{r PlotImputeMissingValues_Total, fig.height=4, fig.width=10}
+<br>The mean is 10770, and the median is 10760. These values differ negligibly from the mean and median calculated with the missing data omitted. Because the mean and median of the un-imputed data are nearly equal, filling in the missing data using the mean of the corresponding sampling interval narrows the distribution of total steps per day but does not significantly change the mean and median. Histograms of the imputed data (left) and the original data with NA values omitted (right) are shown below.
+
+
+```r
 plot2 <- ggplot(totalsImpute, aes(x=steps)) + 
          geom_histogram(binwidth=tickSpacing, fill="salmon") + 
          scale_x_continuous(breaks=tickValues) +
@@ -131,21 +176,35 @@ plot2 <- ggplot(totalsImpute, aes(x=steps)) +
 yRange <- ggplot_build(plot2)$panel$ranges[[1]]$y.range
 grid.arrange(plot2, plot1 + coord_cartesian(ylim=yRange), nrow=1, ncol=2)
 ```
+
+![](./PA1_template_files/figure-html/PlotImputeMissingValues_Total-1.png) 
 <br><br>
 
 ### Are there differences in activity patterns between weekdays and weekends?
 
 A new factor variable "day_type" will distinguish Weekdays and weekends.
 
-```{r ClassifyDate}
+
+```r
 isWeekend <- weekdays(activityImpute$date) %in% c("Saturday", "Sunday")
 activityImpute$day_type <- factor(isWeekend, labels=c("Weekday", "Weekend"))
 head(unique(activityImpute[, c("date", "day_type")]))
 ```
 
+```
+##            date day_type
+## 1    2012-10-01  Weekday
+## 289  2012-10-02  Weekday
+## 577  2012-10-03  Weekday
+## 865  2012-10-04  Weekday
+## 1153 2012-10-05  Weekday
+## 1441 2012-10-06  Weekend
+```
+
 <br>Calculate the mean number of steps for each sampling interval over all dates for weekdays versus weekends.
 
-```{r PlotIntervalMeansImpute, fig.height=4}
+
+```r
 meansImpute <- aggregate(steps ~ interval + day_type, data=activityImpute, FUN=mean)
 meansImpute$time <- with(meansImpute, as.POSIXct(sprintf("%02d:%02d", 
                         trunc(interval / 100), interval %% 100), format="%H:%M"))
@@ -161,6 +220,8 @@ ggplot(meansImpute, aes(x=time, y=steps, color=day_type)) +
              axis.title.y=element_text(size=rel(0.9), vjust=1.2), 
              legend.position="none")
 ```
+
+![](./PA1_template_files/figure-html/PlotIntervalMeansImpute-1.png) 
 
 <br>The mean number of steps on weekdays seems to exhibit clear local maxima in the morning and the evening, possibly corresponding to the subject's travel to and from work. On weekends, activity levels appear to be more uniform over the course of normal waking hours.
 
