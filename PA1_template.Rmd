@@ -1,8 +1,9 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
+title: 'Reproducible Research: Peer Assessment 1'
+output:
   html_document:
-    keep_md: true
+    keep_md: yes
+  pdf_document: default
 ---
 
 <br>This data is from a personal activity monitoring device (i.e. Fitbit, Nike Fuelband, Jawbone Up) collected from an anonymous individual during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
@@ -26,7 +27,7 @@ The variables included in this dataset are:
 
 The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset. Here the data is loaded into a data.frame
 
-```{r LoadData, cache=TRUE}
+```{r LoadData, cache=FALSE}
 activity <- read.csv("activity.csv", stringsAsFactors=FALSE)
 activity$date <- as.Date(activity$date, format="%Y-%m-%d")
 head(activity)

@@ -81,7 +81,7 @@ plot1 <- ggplot(totals[!is.na(totals$steps),], aes(x=steps)) +
 plot1
 ```
 
-![](./PA1_template_files/figure-html/PlotTotalSteps-1.png) 
+![](PA1_template_files/figure-html/PlotTotalSteps-1.png) 
 <br><br>
 
 ### What is the average daily activity pattern?
@@ -117,7 +117,7 @@ ggplot(means, aes(x=time, y=steps)) +
               axis.title.y=element_text(size=rel(0.9), vjust=1.2))
 ```
 
-![](./PA1_template_files/figure-html/PlotIntervalMeans-1.png) 
+![](PA1_template_files/figure-html/PlotIntervalMeans-1.png) 
 <br><br>
 
 ### Imputing missing values
@@ -177,7 +177,7 @@ yRange <- ggplot_build(plot2)$panel$ranges[[1]]$y.range
 grid.arrange(plot2, plot1 + coord_cartesian(ylim=yRange), nrow=1, ncol=2)
 ```
 
-![](./PA1_template_files/figure-html/PlotImputeMissingValues_Total-1.png) 
+![](PA1_template_files/figure-html/PlotImputeMissingValues_Total-1.png) 
 <br><br>
 
 ### Are there differences in activity patterns between weekdays and weekends?
@@ -221,7 +221,7 @@ ggplot(meansImpute, aes(x=time, y=steps, color=day_type)) +
              legend.position="none")
 ```
 
-![](./PA1_template_files/figure-html/PlotIntervalMeansImpute-1.png) 
+![](PA1_template_files/figure-html/PlotIntervalMeansImpute-1.png) 
 
 <br>The mean number of steps on weekdays seems to exhibit clear local maxima in the morning and the evening, possibly corresponding to the subject's travel to and from work. On weekends, activity levels appear to be more uniform over the course of normal waking hours.
 
